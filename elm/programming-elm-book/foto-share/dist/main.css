@@ -1,0 +1,34 @@
+body {
+  background: #333;
+  color: white;
+}
+
+.header {
+  background: #222;
+  color: white;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.photo {
+  max-width: 400px;
+  border: 1px solid black;
+
+  img {
+    width: 100%;
+  }
+
+  .caption {
+    font-size: 18px;
+    font-weight:bold;
+    padding: 20px 10px;
+    margin: 0;
+    background: #222;
+  }
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
+}
