@@ -1,0 +1,8 @@
+{
+	"targets": {
+		"My target name": {
+			"inputs": ["src/FotoShare.elm"],
+			"output": "dist/FotoShare.js"
+		}
+	}
+}
