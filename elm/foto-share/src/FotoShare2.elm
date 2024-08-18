@@ -2,13 +2,14 @@ module FotoShare2 exposing (main)
 
 import Browser
 import Html exposing (..)
-import Html.Attributes exposing (class, src)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
+import Html.Events exposing (onClick, onInput, onSubmit)
 
 
 type Msg
-    = Like
-    | Unlike
+    = ToggleLike
+    | UpdateComment String
+    | SaveComment
 
 
 
@@ -16,12 +17,12 @@ type Msg
 
 
 type alias Model =
-    { url : String, desc : String, liked : Bool }
+    { url : String, desc : String, liked : Bool, comments : List String, newComment : String }
 
 
 initialModel : Model
 initialModel =
-    { url = "https://programming-elm.com/1.jpg", desc = "Initial Photo", liked = False }
+    { url = "https://programming-elm.com/1.jpg", desc = "Initial Photo", liked = False, comments = [ "Cowabunga!!" ], newComment = "" }
 
 
 
@@ -51,11 +52,28 @@ view model =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Like ->
-            { model | liked = True }
+        ToggleLike ->
+            { model | liked = not model.liked }
 
-        Unlike ->
-            { model | liked = False }
+        UpdateComment comment ->
+            { model | newComment = comment }
+
+        SaveComment ->
+            saveNewComment model
+
+
+saveNewComment : Model -> Model
+saveNewComment model =
+    let
+        newComment =
+            String.trim model.newComment
+    in
+    case newComment of
+        "" ->
+            model
+
+        _ ->
+            { model | comments = model.comments ++ [ newComment ], newComment = "" }
 
 
 
@@ -73,25 +91,81 @@ main =
 
 viewPhoto : Model -> Html Msg
 viewPhoto model =
+    div [ class "photo" ]
+        [ img [ src model.url ] []
+        , div [ class "photo-actions" ] [ viewLikeButton model ]
+        , h2 [ class "caption" ] [ text model.desc ]
+        , viewComments model
+        ]
+
+
+viewComments : Model -> Html Msg
+viewComments model =
+    div [ class "comments" ]
+        [ viewCommentList model.comments
+        , viewNewComment model
+        ]
+
+
+viewNewComment : Model -> Html Msg
+viewNewComment model =
+    form [ class "new-comment-form", onSubmit SaveComment ]
+        [ input
+            [ type_ "text"
+            , value model.newComment
+            , placeholder "add a commment"
+            , onInput UpdateComment
+            ]
+            []
+        , button
+            [ class "save-comment-button"
+            , disabled (String.isEmpty model.newComment)
+            ]
+            [ text "Save" ]
+        ]
+
+
+viewComment : String -> Html msg
+viewComment comment =
+    li [ class "comment" ]
+        [ strong [] [ text "Comment:" ]
+        , text (" " ++ comment)
+        ]
+
+
+viewCommentList : List String -> Html Msg
+viewCommentList comments =
+    case comments of
+        [] ->
+            div [] [ text "No Comments" ]
+
+        _ ->
+            div [ class "comments-list-container" ]
+                [ ul [ class "comments-list" ]
+                    (List.map viewComment comments)
+                ]
+
+
+likeButtonClass : Bool -> String
+likeButtonClass liked =
+    if liked then
+        "liked"
+
+    else
+        "not-liked"
+
+
+viewLikeButton : Model -> Html Msg
+viewLikeButton model =
     let
         buttonClass =
+            likeButtonClass model.liked
+
+        buttonText =
             if model.liked then
-                "liked"
+                "Unlike"
 
             else
-                "not-liked"
-
-        msg =
-            if model.liked then
-                Unlike
-
-            else
-                Like
+                "Like"
     in
-    div [ class "photo" ]
-        [ img [ src model.url ]
-            []
-        , h2 [ class "caption" ]
-            [ text model.desc ]
-        , button [ class buttonClass, onClick msg ] [ text buttonClass ]
-        ]
+    button [ class buttonClass, onClick ToggleLike ] [ text buttonText ]
