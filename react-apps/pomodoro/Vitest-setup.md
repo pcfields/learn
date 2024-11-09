@@ -59,3 +59,10 @@ export default defineConfig({
   },
 })
 ```
+
+Create file `setup-tests.ts` and import `jest-dom`
+(https://github.com/testing-library/jest-dom?tab=readme-ov-file#with-vitest)[JestDom Vitest setup]
+
+```
+import '@testing-library/jest-dom/vitest'
+```

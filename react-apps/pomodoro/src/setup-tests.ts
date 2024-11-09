@@ -1,5 +1,2 @@
-import { expect } from "vitest";
-import * as matches from "@testing-library/jest-dom/matchers";
+import "@testing-library/jest-dom/vitest";
 //NOTE: do I need to do cleanup after each test?
-
-expect.extend(matches);
