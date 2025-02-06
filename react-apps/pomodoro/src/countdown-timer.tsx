@@ -1,31 +1,68 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Time } from "./timer/time";
 
 type TimerStatus = "idle" | "running" | "paused";
 
 type CountdownTimerProps = {
-  duration?: number;
+  duration?: number; // duration in minutes
 };
 
 export function CountdownTimer({ duration }: CountdownTimerProps) {
-  const DEFAULT_DURATION = 25;
-  const [status, setStatus] = useState<TimerStatus>("idle");
-  const [seconds, setSeconds] = useState(0);
-  const [minutes, setHours] = useState(duration ?? DEFAULT_DURATION);
   // const dateTimeValue = `PT25M00S`;
+  const DEFAULT_DURATION = 3;
+  const initialRemainingTime = duration ?? DEFAULT_DURATION;
+  const timerDurationInSeconds = initialRemainingTime * 60;
+
+  const timerIntervalRef = useRef<number | undefined>();
+  const [status, setStatus] = useState<TimerStatus>("idle");
+  const [remainingTime, setRemainingTime] = useState(timerDurationInSeconds);
+
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime - minutes * 60;
+
+  const startTimer = () => {
+    setStatus("running");
+
+    timerIntervalRef.current = setInterval(() => {
+      console.log("Timer started", { timerDurationInSeconds, remainingTime });
+      if (remainingTime == 0) {
+      }
+
+      setRemainingTime((remainingTime) => {
+        console.log("state update: remainingTime", remainingTime);
+
+        if (remainingTime > 1) {
+          return remainingTime - 1;
+        }
+
+        return 0;
+      });
+    }, 1000);
+  };
+
+  const pauseTimer = () => {
+    setStatus("paused");
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+  };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (status === "idle" || status === "paused") {
-      setStatus("running");
-      // Start timer
+      startTimer();
     }
 
     if (status === "running") {
-      setStatus("paused");
-      // Pause timer
+      pauseTimer();
     }
+  };
+
+  const handleResetTimer = () => {
+    setRemainingTime(timerDurationInSeconds);
+    setStatus("idle");
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
   const startPauseButtonText = status === "running" ? "Pause" : "Start";
@@ -36,7 +73,9 @@ export function CountdownTimer({ duration }: CountdownTimerProps) {
 
       <div>
         <button type="submit">{startPauseButtonText}</button>
-        <button type="button">Reset</button>
+        <button type="button" onClick={handleResetTimer}>
+          Reset
+        </button>
       </div>
     </form>
   );

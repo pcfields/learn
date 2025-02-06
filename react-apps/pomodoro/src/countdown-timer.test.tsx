@@ -34,14 +34,26 @@ describe("Countdown Timer", () => {
     );
   });
 
-  test("should display stop button after timer is started", async () => {
+  test("should display paused button after timer is started", async () => {
     render(<CountdownTimer />);
 
     const user = userEvent.setup();
-    user.click(screen.getByRole("button", { name: "Start" }));
+    await user.click(screen.getByRole("button", { name: "Start" }));
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
+    });
+  });
+
+  test("can start a paused timer", async () => {
+    render(<CountdownTimer />);
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Start" }));
+    await user.click(screen.getByRole("button", { name: "Pause" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
     });
   });
 
